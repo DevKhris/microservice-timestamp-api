@@ -1,6 +1,6 @@
 let express = require('express');
 let app = express();
-let parseTime = require("./moment.js");
+
 let cors = require('cors');
 app.use(cors({optionsSuccessStatus: 200})); 
 
