@@ -1,9 +1,6 @@
 let express = require('express');
 let app = express();
 
-let cors = require('cors');
-app.use(cors({optionsSuccessStatus: 200})); 
-
 app.use(express.static('public'));
 
 app.get("/", function (req, res) {
@@ -11,29 +8,25 @@ app.get("/", function (req, res) {
 });
 
 app.get("/api/timestamp/", (req, res) => {
-  res.json({ unix: Date.now(), utc: Date() });
+  res.json({ unix: Date.now(), utc: new Date().toUTCString() });
 });
 
-app.get("/api/timestamp/:date", function (req, res) {
-  let date = req.params.date;
-  if(/\d{5,}/.test(date)){
-    let dateInt = parseInt(date);
-    let unix = dateInt;
-    let utc = new Date(dateInt).toUTCString();
-    res.json({
-      unix: unix,
-      utc: utc,
-    });
+app.get("/api/timestamp/:date_string", (req, res) => {
+  let dateString = req.params.date_string;
+
+  if (/\d{5,}/.test(dateString)) {
+    let dateInt = parseInt(dateString);
+    res.json({ unix: dateString, utc: new Date(dateInt).toUTCString() });
   } else {
-    let dateObject = new Date(date);
-    let unix = dateObject.valueOf();
-    let utc = dateObject.toUTCString();
-    res.json({
-      unix: unix,
-      utc: utc,
-    });
+    let dateObject = new Date(dateString);
+
+    if (dateObject.toString() === "Invalid Date") {
+      res.json({ error: "Invalid Date" });
+    } else {
+      res.json({ unix: dateObject.valueOf(), utc: dateObject.toUTCString() });
+    }
   }
-})
+});
 
 var listener = app.listen(process.env.PORT, function () {
   console.log('Timestamp Microservice is listening on port ' + listener.address().port);
